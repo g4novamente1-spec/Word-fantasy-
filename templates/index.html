@@ -2,178 +2,80 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Word Fantasy - Teste de Combate</title>
+<title>Word Fantasy - Inventário e Loja</title>
 <style>
-    body {
-        background-color: #111;
-        color: white;
-        font-family: Arial;
-        text-align: center;
-        padding: 20px;
-    }
-
-    .box {
-        border: 2px solid #555;
-        padding: 15px;
-        margin: 10px;
-        border-radius: 10px;
-    }
-
-    button {
-        padding: 10px 20px;
-        font-size: 16px;
-        margin: 5px;
-        cursor: pointer;
-        border-radius: 8px;
-        border: none;
-    }
-
-    #log {
-        background: #222;
-        padding: 10px;
-        height: 200px;
-        overflow-y: auto;
-        text-align: left;
-    }
+body {
+    background: #111;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+}
+.box {
+    border: 2px solid #555;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+button {
+    padding: 8px 15px;
+    margin: 5px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+#log {
+    background: #222;
+    height: 150px;
+    overflow-y: auto;
+    text-align: left;
+    padding: 10px;
+}
 </style>
 </head>
 <body>
 
-<h1>⚔️ Word Fantasy - Sistema de Teste</h1>
+<h1>⚔️ Word Fantasy - Sistema Expandido</h1>
 
 <div class="box">
-    <h2>🧙 Jogador</h2>
-    <p>Nível: <span id="nivel"></span></p>
-    <p>XP: <span id="xp"></span> / <span id="xpMax"></span></p>
-    <p>Vida: <span id="vida"></span></p>
-    <p>Ataque: <span id="ataque"></span></p>
-    <p>Defesa: <span id="defesa"></span></p>
+<h2>🧙 Jogador</h2>
+<p>Nível: <span id="nivel"></span></p>
+<p>XP: <span id="xp"></span>/<span id="xpMax"></span></p>
+<p>Vida: <span id="vida"></span></p>
+<p>Ataque: <span id="ataque"></span></p>
+<p>Defesa: <span id="defesa"></span></p>
+<p>💰 Ouro: <span id="ouro"></span></p>
 </div>
 
 <div class="box">
-    <h2>👹 Inimigo</h2>
-    <p>Nome: <span id="nomeInimigo"></span></p>
-    <p>Vida: <span id="vidaInimigo"></span></p>
+<h2>👹 Inimigo</h2>
+<p>Nome: <span id="nomeInimigo"></span></p>
+<p>Vida: <span id="vidaInimigo"></span></p>
 </div>
 
 <button onclick="atacar()">⚔️ Atacar</button>
-<button onclick="resetarJogo()">🔄 Resetar</button>
+<button onclick="usarPocao()">🧪 Usar Poção</button>
+
+<div class="box">
+<h2>🎒 Inventário</h2>
+<ul id="inventario"></ul>
+<button onclick="venderItens()">💰 Vender Tudo</button>
+</div>
+
+<div class="box">
+<h2>🏪 Loja</h2>
+<button onclick="comprarPocao()">🧪 Comprar Poção (20 ouro)</button>
+<button onclick="comprarForca()">💪 Comprar Poção Força (30 ouro)</button>
+</div>
 
 <h3>📜 Log</h3>
 <div id="log"></div>
 
 <script>
-let jogador = {
-    nivel: 1,
-    xp: 0,
-    xpMax: 50,
-    vidaMax: 100,
-    vida: 100,
-    ataque: 15,
-    defesa: 5
-};
+let jogador;
+let inimigo;
+let buffForca = 0;
 
-let inimigo = {};
-
-function gerarInimigo() {
-    let nomes = ["Goblin", "Orc", "Esqueleto", "Lobo Sombrio"];
-    let nome = nomes[Math.floor(Math.random() * nomes.length)];
-    let vida = 50 + jogador.nivel * 20;
-    let ataque = 10 + jogador.nivel * 5;
-
-    inimigo = {
-        nome: nome,
-        vida: vida,
-        ataque: ataque
-    };
-
-    atualizarTela();
-}
-
-function atacar() {
-    if (jogador.vida <= 0 || inimigo.vida <= 0) return;
-
-    // Jogador ataca
-    let danoJogador = jogador.ataque - Math.floor(Math.random() * 5);
-    inimigo.vida -= danoJogador;
-    log("🧙 Você causou " + danoJogador + " de dano!");
-
-    if (inimigo.vida <= 0) {
-        log("👹 " + inimigo.nome + " foi derrotado!");
-        ganharXP(20);
-        loot();
-        gerarInimigo();
-        return;
-    }
-
-    // Inimigo ataca
-    let danoInimigo = inimigo.ataque - jogador.defesa;
-    if (danoInimigo < 0) danoInimigo = 0;
-
-    jogador.vida -= danoInimigo;
-    log("👹 " + inimigo.nome + " causou " + danoInimigo + " de dano!");
-
-    if (jogador.vida <= 0) {
-        log("💀 Você morreu! Tudo foi resetado.");
-        setTimeout(resetarJogo, 2000);
-    }
-
-    atualizarTela();
-}
-
-function ganharXP(valor) {
-    jogador.xp += valor;
-    log("✨ Você ganhou " + valor + " XP!");
-
-    if (jogador.xp >= jogador.xpMax) {
-        jogador.xp -= jogador.xpMax;
-        jogador.nivel++;
-        jogador.xpMax += 30;
-
-        jogador.vidaMax += 20;
-        jogador.ataque += 5;
-        jogador.defesa += 2;
-        jogador.vida = jogador.vidaMax;
-
-        log("📈 LEVEL UP! Agora você é nível " + jogador.nivel + "!");
-    }
-
-    atualizarTela();
-}
-
-function loot() {
-    let chance = Math.random();
-
-    if (chance < 0.3) {
-        jogador.ataque += 2;
-        log("🎁 Você encontrou uma espada! +2 Ataque!");
-    } else if (chance < 0.6) {
-        jogador.defesa += 1;
-        log("🛡 Você encontrou um escudo! +1 Defesa!");
-    } else {
-        log("❌ Nenhum item encontrado.");
-    }
-}
-
-function atualizarTela() {
-    document.getElementById("nivel").innerText = jogador.nivel;
-    document.getElementById("xp").innerText = jogador.xp;
-    document.getElementById("xpMax").innerText = jogador.xpMax;
-    document.getElementById("vida").innerText = jogador.vida + " / " + jogador.vidaMax;
-    document.getElementById("ataque").innerText = jogador.ataque;
-    document.getElementById("defesa").innerText = jogador.defesa;
-
-    document.getElementById("nomeInimigo").innerText = inimigo.nome;
-    document.getElementById("vidaInimigo").innerText = inimigo.vida;
-}
-
-function log(texto) {
-    let logDiv = document.getElementById("log");
-    logDiv.innerHTML += "<p>" + texto + "</p>";
-    logDiv.scrollTop = logDiv.scrollHeight;
-}
-
-function resetarJogo() {
+function iniciar() {
     jogador = {
         nivel: 1,
         xp: 0,
@@ -181,14 +83,149 @@ function resetarJogo() {
         vidaMax: 100,
         vida: 100,
         ataque: 15,
-        defesa: 5
+        defesa: 5,
+        ouro: 0,
+        inventario: [],
+        pocoes: 0
     };
-
-    document.getElementById("log").innerHTML = "";
     gerarInimigo();
+    atualizarTela();
 }
 
-gerarInimigo();
+function gerarInimigo() {
+    let tipos = [
+        {nome:"Goblin", drop:"Orelha de Goblin", ouro:10},
+        {nome:"Orc", drop:"Dente de Orc", ouro:15},
+        {nome:"Esqueleto", drop:"Osso Amaldiçoado", ouro:20}
+    ];
+
+    let tipo = tipos[Math.floor(Math.random()*tipos.length)];
+
+    let escala = Math.floor(jogador.nivel / 2) + 1;
+
+    inimigo = {
+        nome: tipo.nome,
+        vida: 50 * escala,
+        ataque: 10 * escala,
+        drop: tipo.drop,
+        valor: tipo.ouro
+    };
+
+    atualizarTela();
+}
+
+function atacar() {
+    if (jogador.vida <= 0) return;
+
+    let dano = jogador.ataque + buffForca;
+    inimigo.vida -= dano;
+    log("⚔️ Você causou " + dano + " de dano.");
+
+    if (inimigo.vida <= 0) {
+        log("👹 " + inimigo.nome + " derrotado!");
+        jogador.xp += 20;
+        jogador.inventario.push({nome: inimigo.drop, valor: inimigo.valor});
+        log("🎁 Dropou: " + inimigo.drop);
+        verificarLevelUp();
+        gerarInimigo();
+        return;
+    }
+
+    let danoInimigo = inimigo.ataque - jogador.defesa;
+    if (danoInimigo < 0) danoInimigo = 0;
+
+    jogador.vida -= danoInimigo;
+    log("👹 Você recebeu " + danoInimigo + " de dano.");
+
+    if (jogador.vida <= 0) {
+        log("💀 Você morreu! Resetando...");
+        setTimeout(iniciar,2000);
+    }
+
+    atualizarTela();
+}
+
+function verificarLevelUp() {
+    if (jogador.xp >= jogador.xpMax) {
+        jogador.xp -= jogador.xpMax;
+        jogador.nivel++;
+        jogador.xpMax += 30;
+        jogador.vidaMax += 20;
+        jogador.ataque += 5;
+        jogador.defesa += 2;
+        jogador.vida = jogador.vidaMax;
+        log("📈 LEVEL UP! Nível " + jogador.nivel);
+    }
+}
+
+function venderItens() {
+    let total = 0;
+    jogador.inventario.forEach(item => total += item.valor);
+    jogador.ouro += total;
+    jogador.inventario = [];
+    log("💰 Você ganhou " + total + " de ouro.");
+    atualizarTela();
+}
+
+function comprarPocao() {
+    if (jogador.ouro >= 20) {
+        jogador.ouro -= 20;
+        jogador.pocoes++;
+        log("🧪 Poção comprada!");
+    } else {
+        log("❌ Ouro insuficiente.");
+    }
+    atualizarTela();
+}
+
+function usarPocao() {
+    if (jogador.pocoes > 0) {
+        jogador.pocoes--;
+        jogador.vida += 40;
+        if (jogador.vida > jogador.vidaMax) jogador.vida = jogador.vidaMax;
+        log("🧪 Você usou uma poção!");
+    } else {
+        log("❌ Você não tem poções.");
+    }
+    atualizarTela();
+}
+
+function comprarForca() {
+    if (jogador.ouro >= 30) {
+        jogador.ouro -= 30;
+        buffForca = 10;
+        log("💪 Buff de força ativado (+10 dano no próximo ataque)");
+    } else {
+        log("❌ Ouro insuficiente.");
+    }
+    atualizarTela();
+}
+
+function atualizarTela() {
+    document.getElementById("nivel").innerText = jogador.nivel;
+    document.getElementById("xp").innerText = jogador.xp;
+    document.getElementById("xpMax").innerText = jogador.xpMax;
+    document.getElementById("vida").innerText = jogador.vida + "/" + jogador.vidaMax;
+    document.getElementById("ataque").innerText = jogador.ataque;
+    document.getElementById("defesa").innerText = jogador.defesa;
+    document.getElementById("ouro").innerText = jogador.ouro;
+    document.getElementById("nomeInimigo").innerText = inimigo.nome;
+    document.getElementById("vidaInimigo").innerText = inimigo.vida;
+
+    let lista = document.getElementById("inventario");
+    lista.innerHTML = "";
+    jogador.inventario.forEach(item => {
+        lista.innerHTML += "<li>"+item.nome+" ("+item.valor+" ouro)</li>";
+    });
+}
+
+function log(texto) {
+    let l = document.getElementById("log");
+    l.innerHTML += "<p>"+texto+"</p>";
+    l.scrollTop = l.scrollHeight;
+}
+
+iniciar();
 </script>
 
 </body>
