@@ -68,6 +68,10 @@ let player = {
     luck: 5
 };
 
+let enemy = {
+    hp: 30
+};
+
 function updateStats() {
     document.getElementById("hp").innerText = player.hp;
     document.getElementById("atk").innerText = player.atk;
@@ -75,31 +79,61 @@ function updateStats() {
 }
 
 function startGame() {
+    enemy.hp = 30;
+
     document.getElementById("text-box").innerText =
-        "Um goblin aparece diante de você!";
-    
+        "Um goblin aparece diante de você! HP do Goblin: " + enemy.hp;
+
     document.getElementById("buttons").innerHTML = `
         <button onclick="attack()">Atacar</button>
         <button onclick="run()">Fugir</button>
     `;
 }
 
-function attack() {
-    let damage = Math.floor(Math.random() * player.atk) + 1;
-    document.getElementById("text-box").innerText =
-        "Você causou " + damage + " de dano ao goblin!";
+async function attack() {
+
+    const response = await fetch("/attack", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            player_atk: player.atk,
+            player_luck: player.luck,
+            enemy_hp: enemy.hp
+        })
+    });
+
+    const data = await response.json();
+
+    enemy.hp = data.enemy_hp;
+
+    let message = "Você causou " + data.damage + " de dano.";
+
+    if (data.critical) {
+        message += " 💥 CRÍTICO!";
+    }
+
+    if (enemy.hp <= 0) {
+        message += " O goblin morreu!";
+        document.getElementById("buttons").innerHTML =
+            `<button onclick="startGame()">Explorar novamente</button>`;
+    } else {
+        message += " HP do Goblin: " + enemy.hp;
+    }
+
+    document.getElementById("text-box").innerText = message;
 }
 
 function run() {
     document.getElementById("text-box").innerText =
         "Você fugiu com sucesso!";
-    
-    document.getElementById("buttons").innerHTML = "";
+    document.getElementById("buttons").innerHTML =
+        `<button onclick="startGame()">Explorar novamente</button>`;
 }
 
 document.getElementById("buttons").innerHTML =
     `<button onclick="startGame()">Explorar</button>`;
 </script>
-
 </body>
 </html>
