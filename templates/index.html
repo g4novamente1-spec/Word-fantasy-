@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Word Fantasy</title>
+    <title>Word Fantasy - Combate</title>
     <style>
         body {
-            background: black;
+            background: #0d0d0d;
             color: white;
             font-family: Arial;
             text-align: center;
         }
 
-        #game-image {
-            width: 400px;
-            margin: 20px auto;
-        }
-
-        #text-box {
-            background: #111;
+        .box {
+            background: #1a1a1a;
+            border: 1px solid #444;
             padding: 20px;
             margin: 20px auto;
             width: 60%;
-            border: 1px solid red;
         }
 
         button {
             padding: 10px 20px;
-            margin: 10px;
+            margin: 5px;
             background: darkred;
             color: white;
             border: none;
@@ -36,144 +31,122 @@
             background: red;
         }
 
-        #stats {
-            margin-top: 20px;
-            border-top: 1px solid gray;
-            padding-top: 10px;
+        #log {
+            text-align: left;
+            height: 150px;
+            overflow-y: auto;
+            background: black;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
 
-<h1>WORD FANTASY</h1>
+<h1>⚔️ WORD FANTASY ⚔️</h1>
 
-<img id="game-image" src="https://i.imgur.com/3ZQ3Z6D.jpg">
-
-<div id="text-box">
-    Você acorda na Floresta Sombria...
+<div class="box">
+    <h2>Jogador</h2>
+    HP: <span id="player_hp"></span><br>
+    Defesa: <span id="player_def"></span><br>
+    Poções: <span id="player_potions"></span>
 </div>
 
-<div id="buttons"></div>
+<div class="box">
+    <h2>Inimigo</h2>
+    HP: <span id="enemy_hp"></span>
+</div>
 
-<div id="stats">
-    ❤️ Vida: <span id="hp">100</span> |
-    ⚔️ Ataque: <span id="atk">10</span> |
-    🍀 Sorte: <span id="luck">5</span>
+<div class="box">
+    <button onclick="sendAction('attack')">Atacar</button>
+    <button onclick="sendAction('potion')">Usar Poção</button>
+    <button onclick="resetGame()">Reiniciar</button>
+</div>
+
+<div class="box">
+    <h3>Log de Combate</h3>
+    <div id="log"></div>
 </div>
 
 <script>
+
 let player = {
-    hp: 100,
-    atk: 10,
-    luck: 5
+    hp: 120,
+    min_atk: 8,
+    max_atk: 15,
+    def: 4,
+    luck: 5,
+    potions: 3
 };
 
 let enemy = {
-    hp: 30
+    hp: 100,
+    min_atk: 6,
+    max_atk: 12,
+    def: 2
 };
 
-function updateStats() {
-    document.getElementById("hp").innerText = player.hp;
-    document.getElementById("atk").innerText = player.atk;
-    document.getElementById("luck").innerText = player.luck;
+function updateUI() {
+    document.getElementById("player_hp").innerText = player.hp;
+    document.getElementById("player_def").innerText = player.def;
+    document.getElementById("player_potions").innerText = player.potions;
+    document.getElementById("enemy_hp").innerText = enemy.hp;
 }
 
-function startGame() {
-    enemy.hp = 30;
+async function sendAction(action) {
 
-    document.getElementById("text-box").innerText =
-        "Um goblin aparece diante de você! HP do Goblin: " + enemy.hp;
+    if (player.hp <= 0 || enemy.hp <= 0) return;
 
-    document.getElementById("buttons").innerHTML = `
-        <button onclick="attack()">Atacar</button>
-        <button onclick="run()">Fugir</button>
-    `;
-}
-
-async function attack() {
-
-    const response = await fetch("/attack", {
+    const response = await fetch("/combat", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-    player_hp: player.hp,
-    player_atk: player.atk,
-    player_luck: player.luck,
-    enemy_hp: enemy.hp
-})
-    });
-
-    const data = await response.json();
-
-    player.hp = data.player_hp;
-    enemy.hp = data.enemy_hp;
-
-    updateStats();
-
-    let message = "Você causou " + data.damage + " de dano.";
-
-    if (data.critical) {
-        message += " 💥 CRÍTICO!";
-    }
-
-    if (enemy.hp <= 0) {
-        message += " O goblin morreu!";
-        document.getElementById("buttons").innerHTML =
-            `<button onclick="startGame()">Explorar novamente</button>`;
-    } else if (player.hp <= 0) {
-        message += " O goblin contra-atacou e você morreu!";
-        document.getElementById("buttons").innerHTML =
-            `<button onclick="restartGame()">Recomeçar</button>`;
-    } else {
-        message += " O goblin causou " + data.enemy_damage + " de dano.";
-        message += " HP do Goblin: " + enemy.hp;
-    }
-
-    document.getElementById("text-box").innerText = message;
-}
-
-    async function attack() {
-
-    const response = await fetch("/attack", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            player_hp: player.hp,
-            player_atk: player.atk,
-            player_luck: player.luck,
-            enemy_hp: enemy.hp
+            player: player,
+            enemy: enemy,
+            action: action
         })
     });
 
     const data = await response.json();
 
-    player.hp = data.player_hp;
-    enemy.hp = data.enemy_hp;
+    player = data.player;
+    enemy = data.enemy;
 
-    updateStats();
+    updateUI();
 
-    let message = "Você causou " + data.damage + " de dano.";
+    const logBox = document.getElementById("log");
+    data.log.forEach(msg => {
+        logBox.innerHTML += msg + "<br>";
+    });
 
-    if (data.critical) {
-        message += " 💥 CRÍTICO!";
-    }
-
-    if (enemy.hp <= 0) {
-        message += " O goblin morreu!";
-        document.getElementById("buttons").innerHTML =
-            `<button onclick="startGame()">Explorar novamente</button>`;
-    } else if (player.hp <= 0) {
-        message += " O goblin contra-atacou e você morreu!";
-        document.getElementById("buttons").innerHTML =
-            `<button onclick="restartGame()">Recomeçar</button>`;
-    } else {
-        message += " O goblin causou " + data.enemy_damage + " de dano.";
-        message += " HP do Goblin: " + enemy.hp;
-    }
-
-    document.getElementById("text-box").innerText = message;
+    logBox.scrollTop = logBox.scrollHeight;
 }
+
+function resetGame() {
+
+    player = {
+        hp: 120,
+        min_atk: 8,
+        max_atk: 15,
+        def: 4,
+        luck: 5,
+        potions: 3
+    };
+
+    enemy = {
+        hp: 100,
+        min_atk: 6,
+        max_atk: 12,
+        def: 2
+    };
+
+    document.getElementById("log").innerHTML = "";
+
+    updateUI();
+}
+
+updateUI();
+
+</script>
+
+</body>
+</html>
