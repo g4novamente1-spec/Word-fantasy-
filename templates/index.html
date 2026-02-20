@@ -98,6 +98,7 @@ async function attack() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
+            player_hp: player.hp,
             player_atk: player.atk,
             player_luck: player.luck,
             enemy_hp: enemy.hp
@@ -106,7 +107,10 @@ async function attack() {
 
     const data = await response.json();
 
+    player.hp = data.player_hp;
     enemy.hp = data.enemy_hp;
+
+    updateStats();
 
     let message = "Você causou " + data.damage + " de dano.";
 
@@ -118,22 +122,58 @@ async function attack() {
         message += " O goblin morreu!";
         document.getElementById("buttons").innerHTML =
             `<button onclick="startGame()">Explorar novamente</button>`;
+    } else if (player.hp <= 0) {
+        message += " O goblin contra-atacou e você morreu!";
+        document.getElementById("buttons").innerHTML =
+            `<button onclick="restartGame()">Recomeçar</button>`;
     } else {
+        message += " O goblin causou " + data.enemy_damage + " de dano.";
         message += " HP do Goblin: " + enemy.hp;
     }
 
     document.getElementById("text-box").innerText = message;
 }
 
-function run() {
-    document.getElementById("text-box").innerText =
-        "Você fugiu com sucesso!";
-    document.getElementById("buttons").innerHTML =
-        `<button onclick="startGame()">Explorar novamente</button>`;
-}
+    async function attack() {
 
-document.getElementById("buttons").innerHTML =
-    `<button onclick="startGame()">Explorar</button>`;
-</script>
-</body>
-</html>
+    const response = await fetch("/attack", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            player_hp: player.hp,
+            player_atk: player.atk,
+            player_luck: player.luck,
+            enemy_hp: enemy.hp
+        })
+    });
+
+    const data = await response.json();
+
+    player.hp = data.player_hp;
+    enemy.hp = data.enemy_hp;
+
+    updateStats();
+
+    let message = "Você causou " + data.damage + " de dano.";
+
+    if (data.critical) {
+        message += " 💥 CRÍTICO!";
+    }
+
+    if (enemy.hp <= 0) {
+        message += " O goblin morreu!";
+        document.getElementById("buttons").innerHTML =
+            `<button onclick="startGame()">Explorar novamente</button>`;
+    } else if (player.hp <= 0) {
+        message += " O goblin contra-atacou e você morreu!";
+        document.getElementById("buttons").innerHTML =
+            `<button onclick="restartGame()">Recomeçar</button>`;
+    } else {
+        message += " O goblin causou " + data.enemy_damage + " de dano.";
+        message += " HP do Goblin: " + enemy.hp;
+    }
+
+    document.getElementById("text-box").innerText = message;
+}
