@@ -98,11 +98,11 @@ async function attack() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            player_hp: player.hp,
-            player_atk: player.atk,
-            player_luck: player.luck,
-            enemy_hp: enemy.hp
-        })
+    player_hp: player.hp,
+    player_atk: player.atk,
+    player_luck: player.luck,
+    enemy_hp: enemy.hp
+})
     });
 
     const data = await response.json();
