@@ -114,7 +114,8 @@ function gerarInimigo() {
 
     let tipo = tipos[Math.floor(Math.random()*tipos.length)];
 
-    let escala = Math.floor(jogador.nivel / 2) + 1;
+    // 🔥 Escala agora a cada 4 níveis
+    let escala = Math.floor(jogador.nivel / 4) + 1;
 
     inimigo = {
         nome: tipo.nome,
