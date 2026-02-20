@@ -2,7 +2,8 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Word Fantasy - Inventário e Loja</title>
+<title>Word Fantasy - RPG Teste</title>
+
 <style>
 body {
     background: #111;
@@ -10,12 +11,14 @@ body {
     font-family: Arial;
     text-align: center;
 }
+
 .box {
     border: 2px solid #555;
     margin: 10px;
     padding: 10px;
     border-radius: 10px;
 }
+
 button {
     padding: 8px 15px;
     margin: 5px;
@@ -23,12 +26,17 @@ button {
     border: none;
     cursor: pointer;
 }
+
 #log {
     background: #222;
     height: 150px;
     overflow-y: auto;
     text-align: left;
     padding: 10px;
+}
+
+img {
+    margin: 10px;
 }
 </style>
 </head>
@@ -38,16 +46,19 @@ button {
 
 <div class="box">
 <h2>🧙 Jogador</h2>
+<img src="assets/imagens/jogador.png" width="150">
 <p>Nível: <span id="nivel"></span></p>
 <p>XP: <span id="xp"></span>/<span id="xpMax"></span></p>
 <p>Vida: <span id="vida"></span></p>
 <p>Ataque: <span id="ataque"></span></p>
 <p>Defesa: <span id="defesa"></span></p>
 <p>💰 Ouro: <span id="ouro"></span></p>
+<p>🧪 Poções: <span id="pocoes"></span></p>
 </div>
 
 <div class="box">
 <h2>👹 Inimigo</h2>
+<img id="imgInimigo" width="150">
 <p>Nome: <span id="nomeInimigo"></span></p>
 <p>Vida: <span id="vidaInimigo"></span></p>
 </div>
@@ -64,16 +75,16 @@ button {
 <div class="box">
 <h2>🏪 Loja</h2>
 <button onclick="comprarPocao()">🧪 Comprar Poção (20 ouro)</button>
-<button onclick="comprarForca()">💪 Comprar Poção Força (30 ouro)</button>
+<button onclick="comprarForca()">💪 Treinar Força (+4 permanente) (30 ouro)</button>
 </div>
 
 <h3>📜 Log</h3>
 <div id="log"></div>
 
 <script>
+
 let jogador;
 let inimigo;
-let buffForca = 0;
 
 function iniciar() {
     jogador = {
@@ -88,15 +99,17 @@ function iniciar() {
         inventario: [],
         pocoes: 0
     };
+
     gerarInimigo();
     atualizarTela();
 }
 
 function gerarInimigo() {
+
     let tipos = [
-        {nome:"Goblin", drop:"Orelha de Goblin", ouro:10},
-        {nome:"Orc", drop:"Dente de Orc", ouro:15},
-        {nome:"Esqueleto", drop:"Osso Amaldiçoado", ouro:20}
+        {nome:"Goblin", drop:"Orelha de Goblin", ouro:10, img:"assets/imagens/goblin.png"},
+        {nome:"Orc", drop:"Dente de Orc", ouro:15, img:"assets/imagens/orc.png"},
+        {nome:"Esqueleto", drop:"Osso Amaldiçoado", ouro:20, img:"assets/imagens/esqueleto.png"}
     ];
 
     let tipo = tipos[Math.floor(Math.random()*tipos.length)];
@@ -108,16 +121,20 @@ function gerarInimigo() {
         vida: 50 * escala,
         ataque: 10 * escala,
         drop: tipo.drop,
-        valor: tipo.ouro
+        valor: tipo.ouro,
+        img: tipo.img
     };
+
+    document.getElementById("imgInimigo").src = inimigo.img;
 
     atualizarTela();
 }
 
 function atacar() {
+
     if (jogador.vida <= 0) return;
 
-    let dano = jogador.ataque + buffForca;
+    let dano = jogador.ataque;
     inimigo.vida -= dano;
     log("⚔️ Você causou " + dano + " de dano.");
 
@@ -154,7 +171,7 @@ function verificarLevelUp() {
         jogador.ataque += 5;
         jogador.defesa += 2;
         jogador.vida = jogador.vidaMax;
-        log("📈 LEVEL UP! Nível " + jogador.nivel);
+        log("📈 LEVEL UP! Agora nível " + jogador.nivel);
     }
 }
 
@@ -163,7 +180,7 @@ function venderItens() {
     jogador.inventario.forEach(item => total += item.valor);
     jogador.ouro += total;
     jogador.inventario = [];
-    log("💰 Você ganhou " + total + " de ouro.");
+    log("💰 Você ganhou " + total + " ouro.");
     atualizarTela();
 }
 
@@ -193,8 +210,8 @@ function usarPocao() {
 function comprarForca() {
     if (jogador.ouro >= 30) {
         jogador.ouro -= 30;
-        buffForca = 10;
-        log("💪 Buff de força ativado (+10 dano no próximo ataque)");
+        jogador.ataque += 4;
+        log("💪 Você treinou força! +4 Ataque permanente!");
     } else {
         log("❌ Ouro insuficiente.");
     }
@@ -202,6 +219,7 @@ function comprarForca() {
 }
 
 function atualizarTela() {
+
     document.getElementById("nivel").innerText = jogador.nivel;
     document.getElementById("xp").innerText = jogador.xp;
     document.getElementById("xpMax").innerText = jogador.xpMax;
@@ -209,6 +227,7 @@ function atualizarTela() {
     document.getElementById("ataque").innerText = jogador.ataque;
     document.getElementById("defesa").innerText = jogador.defesa;
     document.getElementById("ouro").innerText = jogador.ouro;
+    document.getElementById("pocoes").innerText = jogador.pocoes;
     document.getElementById("nomeInimigo").innerText = inimigo.nome;
     document.getElementById("vidaInimigo").innerText = inimigo.vida;
 
@@ -226,7 +245,7 @@ function log(texto) {
 }
 
 iniciar();
-</script>
 
+</script>
 </body>
 </html>
