@@ -15,24 +15,35 @@ def home(request: Request):
 
 @app.post("/attack")
 def attack(data: dict):
+    player_hp = data["player_hp"]
     player_atk = data["player_atk"]
     player_luck = data["player_luck"]
 
-    # Status do inimigo (por enquanto fixo)
     enemy_hp = data["enemy_hp"]
+    enemy_atk = 6
     enemy_def = 3
 
-    # Chance crítica baseada em sorte
+    # ---- ATAQUE DO JOGADOR ----
     crit = random.randint(1, 100) <= player_luck * 5
-
     base_damage = random.randint(1, player_atk)
     damage = base_damage * 2 if crit else base_damage
-
     damage = max(0, damage - enemy_def)
-
     enemy_hp -= damage
 
+    enemy_damage = 0
+
+    # ---- SE INIMIGO SOBREVIVE, ELE ATACA ----
+    if enemy_hp > 0:
+        enemy_damage = random.randint(1, enemy_atk)
+        player_hp -= enemy_damage
+
     return JSONResponse({
+        "damage": damage,
+        "enemy_hp": enemy_hp,
+        "critical": crit,
+        "enemy_damage": enemy_damage,
+        "player_hp": player_hp
+    }){
         "damage": damage,
         "enemy_hp": enemy_hp,
         "critical": crit
