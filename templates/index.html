@@ -2,15 +2,104 @@
 <html>
 <head>
     <title>Word Fantasy</title>
+    <style>
+        body {
+            background: black;
+            color: white;
+            font-family: Arial;
+            text-align: center;
+        }
+
+        #game-image {
+            width: 400px;
+            margin: 20px auto;
+        }
+
+        #text-box {
+            background: #111;
+            padding: 20px;
+            margin: 20px auto;
+            width: 60%;
+            border: 1px solid red;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background: darkred;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: red;
+        }
+
+        #stats {
+            margin-top: 20px;
+            border-top: 1px solid gray;
+            padding-top: 10px;
+        }
+    </style>
 </head>
-<body style="background:black; color:white; text-align:center; font-family:Arial;">
+<body>
 
 <h1>WORD FANTASY</h1>
-<p>O mundo está prestes a mudar...</p>
 
-<button onclick="alert('A aventura vai começar!')">
-Começar
-</button>
+<img id="game-image" src="https://i.imgur.com/3ZQ3Z6D.jpg">
+
+<div id="text-box">
+    Você acorda na Floresta Sombria...
+</div>
+
+<div id="buttons"></div>
+
+<div id="stats">
+    ❤️ Vida: <span id="hp">100</span> |
+    ⚔️ Ataque: <span id="atk">10</span> |
+    🍀 Sorte: <span id="luck">5</span>
+</div>
+
+<script>
+let player = {
+    hp: 100,
+    atk: 10,
+    luck: 5
+};
+
+function updateStats() {
+    document.getElementById("hp").innerText = player.hp;
+    document.getElementById("atk").innerText = player.atk;
+    document.getElementById("luck").innerText = player.luck;
+}
+
+function startGame() {
+    document.getElementById("text-box").innerText =
+        "Um goblin aparece diante de você!";
+    
+    document.getElementById("buttons").innerHTML = `
+        <button onclick="attack()">Atacar</button>
+        <button onclick="run()">Fugir</button>
+    `;
+}
+
+function attack() {
+    let damage = Math.floor(Math.random() * player.atk) + 1;
+    document.getElementById("text-box").innerText =
+        "Você causou " + damage + " de dano ao goblin!";
+}
+
+function run() {
+    document.getElementById("text-box").innerText =
+        "Você fugiu com sucesso!";
+    
+    document.getElementById("buttons").innerHTML = "";
+}
+
+document.getElementById("buttons").innerHTML =
+    `<button onclick="startGame()">Explorar</button>`;
+</script>
 
 </body>
 </html>
