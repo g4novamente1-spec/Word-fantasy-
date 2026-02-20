@@ -1,151 +1,194 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Word Fantasy - Combate</title>
-    <style>
-        body {
-            background: #0d0d0d;
-            color: white;
-            font-family: Arial;
-            text-align: center;
-        }
+<meta charset="UTF-8">
+<title>Word Fantasy - Teste de Combate</title>
+<style>
+    body {
+        background-color: #111;
+        color: white;
+        font-family: Arial;
+        text-align: center;
+        padding: 20px;
+    }
 
-        .box {
-            background: #1a1a1a;
-            border: 1px solid #444;
-            padding: 20px;
-            margin: 20px auto;
-            width: 60%;
-        }
+    .box {
+        border: 2px solid #555;
+        padding: 15px;
+        margin: 10px;
+        border-radius: 10px;
+    }
 
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            background: darkred;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        margin: 5px;
+        cursor: pointer;
+        border-radius: 8px;
+        border: none;
+    }
 
-        button:hover {
-            background: red;
-        }
-
-        #log {
-            text-align: left;
-            height: 150px;
-            overflow-y: auto;
-            background: black;
-            padding: 10px;
-        }
-    </style>
+    #log {
+        background: #222;
+        padding: 10px;
+        height: 200px;
+        overflow-y: auto;
+        text-align: left;
+    }
+</style>
 </head>
 <body>
 
-<h1>⚔️ WORD FANTASY ⚔️</h1>
+<h1>⚔️ Word Fantasy - Sistema de Teste</h1>
 
 <div class="box">
-    <h2>Jogador</h2>
-    HP: <span id="player_hp"></span><br>
-    Defesa: <span id="player_def"></span><br>
-    Poções: <span id="player_potions"></span>
+    <h2>🧙 Jogador</h2>
+    <p>Nível: <span id="nivel"></span></p>
+    <p>XP: <span id="xp"></span> / <span id="xpMax"></span></p>
+    <p>Vida: <span id="vida"></span></p>
+    <p>Ataque: <span id="ataque"></span></p>
+    <p>Defesa: <span id="defesa"></span></p>
 </div>
 
 <div class="box">
-    <h2>Inimigo</h2>
-    HP: <span id="enemy_hp"></span>
+    <h2>👹 Inimigo</h2>
+    <p>Nome: <span id="nomeInimigo"></span></p>
+    <p>Vida: <span id="vidaInimigo"></span></p>
 </div>
 
-<div class="box">
-    <button onclick="sendAction('attack')">Atacar</button>
-    <button onclick="sendAction('potion')">Usar Poção</button>
-    <button onclick="resetGame()">Reiniciar</button>
-</div>
+<button onclick="atacar()">⚔️ Atacar</button>
+<button onclick="resetarJogo()">🔄 Resetar</button>
 
-<div class="box">
-    <h3>Log de Combate</h3>
-    <div id="log"></div>
-</div>
+<h3>📜 Log</h3>
+<div id="log"></div>
 
 <script>
-
-let player = {
-    hp: 120,
-    min_atk: 8,
-    max_atk: 15,
-    def: 4,
-    luck: 5,
-    potions: 3
+let jogador = {
+    nivel: 1,
+    xp: 0,
+    xpMax: 50,
+    vidaMax: 100,
+    vida: 100,
+    ataque: 15,
+    defesa: 5
 };
 
-let enemy = {
-    hp: 100,
-    min_atk: 6,
-    max_atk: 12,
-    def: 2
-};
+let inimigo = {};
 
-function updateUI() {
-    document.getElementById("player_hp").innerText = player.hp;
-    document.getElementById("player_def").innerText = player.def;
-    document.getElementById("player_potions").innerText = player.potions;
-    document.getElementById("enemy_hp").innerText = enemy.hp;
-}
+function gerarInimigo() {
+    let nomes = ["Goblin", "Orc", "Esqueleto", "Lobo Sombrio"];
+    let nome = nomes[Math.floor(Math.random() * nomes.length)];
+    let vida = 50 + jogador.nivel * 20;
+    let ataque = 10 + jogador.nivel * 5;
 
-async function sendAction(action) {
-
-    if (player.hp <= 0 || enemy.hp <= 0) return;
-
-    const response = await fetch("/combat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            player: player,
-            enemy: enemy,
-            action: action
-        })
-    });
-
-    const data = await response.json();
-
-    player = data.player;
-    enemy = data.enemy;
-
-    updateUI();
-
-    const logBox = document.getElementById("log");
-    data.log.forEach(msg => {
-        logBox.innerHTML += msg + "<br>";
-    });
-
-    logBox.scrollTop = logBox.scrollHeight;
-}
-
-function resetGame() {
-
-    player = {
-        hp: 120,
-        min_atk: 8,
-        max_atk: 15,
-        def: 4,
-        luck: 5,
-        potions: 3
+    inimigo = {
+        nome: nome,
+        vida: vida,
+        ataque: ataque
     };
 
-    enemy = {
-        hp: 100,
-        min_atk: 6,
-        max_atk: 12,
-        def: 2
+    atualizarTela();
+}
+
+function atacar() {
+    if (jogador.vida <= 0 || inimigo.vida <= 0) return;
+
+    // Jogador ataca
+    let danoJogador = jogador.ataque - Math.floor(Math.random() * 5);
+    inimigo.vida -= danoJogador;
+    log("🧙 Você causou " + danoJogador + " de dano!");
+
+    if (inimigo.vida <= 0) {
+        log("👹 " + inimigo.nome + " foi derrotado!");
+        ganharXP(20);
+        loot();
+        gerarInimigo();
+        return;
+    }
+
+    // Inimigo ataca
+    let danoInimigo = inimigo.ataque - jogador.defesa;
+    if (danoInimigo < 0) danoInimigo = 0;
+
+    jogador.vida -= danoInimigo;
+    log("👹 " + inimigo.nome + " causou " + danoInimigo + " de dano!");
+
+    if (jogador.vida <= 0) {
+        log("💀 Você morreu! Tudo foi resetado.");
+        setTimeout(resetarJogo, 2000);
+    }
+
+    atualizarTela();
+}
+
+function ganharXP(valor) {
+    jogador.xp += valor;
+    log("✨ Você ganhou " + valor + " XP!");
+
+    if (jogador.xp >= jogador.xpMax) {
+        jogador.xp -= jogador.xpMax;
+        jogador.nivel++;
+        jogador.xpMax += 30;
+
+        jogador.vidaMax += 20;
+        jogador.ataque += 5;
+        jogador.defesa += 2;
+        jogador.vida = jogador.vidaMax;
+
+        log("📈 LEVEL UP! Agora você é nível " + jogador.nivel + "!");
+    }
+
+    atualizarTela();
+}
+
+function loot() {
+    let chance = Math.random();
+
+    if (chance < 0.3) {
+        jogador.ataque += 2;
+        log("🎁 Você encontrou uma espada! +2 Ataque!");
+    } else if (chance < 0.6) {
+        jogador.defesa += 1;
+        log("🛡 Você encontrou um escudo! +1 Defesa!");
+    } else {
+        log("❌ Nenhum item encontrado.");
+    }
+}
+
+function atualizarTela() {
+    document.getElementById("nivel").innerText = jogador.nivel;
+    document.getElementById("xp").innerText = jogador.xp;
+    document.getElementById("xpMax").innerText = jogador.xpMax;
+    document.getElementById("vida").innerText = jogador.vida + " / " + jogador.vidaMax;
+    document.getElementById("ataque").innerText = jogador.ataque;
+    document.getElementById("defesa").innerText = jogador.defesa;
+
+    document.getElementById("nomeInimigo").innerText = inimigo.nome;
+    document.getElementById("vidaInimigo").innerText = inimigo.vida;
+}
+
+function log(texto) {
+    let logDiv = document.getElementById("log");
+    logDiv.innerHTML += "<p>" + texto + "</p>";
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+function resetarJogo() {
+    jogador = {
+        nivel: 1,
+        xp: 0,
+        xpMax: 50,
+        vidaMax: 100,
+        vida: 100,
+        ataque: 15,
+        defesa: 5
     };
 
     document.getElementById("log").innerHTML = "";
-
-    updateUI();
+    gerarInimigo();
 }
 
-updateUI();
-
+gerarInimigo();
 </script>
 
 </body>
