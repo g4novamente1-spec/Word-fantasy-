@@ -16,35 +16,18 @@ def home(request: Request):
 @app.post("/attack")
 def attack(data: dict):
     player_hp = data["player_hp"]
-    player_atk = data["player_atk"]
-    player_luck = data["player_luck"]
-
     enemy_hp = data["enemy_hp"]
-    enemy_atk = 6
-    enemy_def = 3
 
-    # ---- ATAQUE DO JOGADOR ----
-    crit = random.randint(1, 100) <= player_luck * 5
-    base_damage = random.randint(1, player_atk)
-    damage = base_damage * 2 if crit else base_damage
-    damage = max(0, damage - enemy_def)
-    enemy_hp -= damage
+    # jogador sempre causa 1 de dano
+    enemy_hp -= 1
 
-    enemy_damage = 0
+    # goblin sempre causa 20 de dano
+    player_hp -= 20
 
-    # ---- SE INIMIGO SOBREVIVE, ELE ATACA ----
-    if enemy_hp > 0:
-        enemy_damage = random.randint(1, enemy_atk)
-        player_hp -= enemy_damage
-
-    return JSONResponse({
-        "damage": damage,
+    return {
+        "damage": 1,
         "enemy_hp": enemy_hp,
-        "critical": crit,
-        "enemy_damage": enemy_damage,
+        "critical": False,
+        "enemy_damage": 20,
         "player_hp": player_hp
-    }){
-        "damage": damage,
-        "enemy_hp": enemy_hp,
-        "critical": crit
-    })
+    }
