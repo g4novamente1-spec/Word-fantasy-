@@ -57,6 +57,7 @@ def combat(data: dict):
 
     if enemy["hp"] > 0:
 
+
         enemy_damage = random.randint(enemy["min_atk"], enemy["max_atk"])
         enemy_damage = max(0, enemy_damage - player["def"])
 
@@ -78,3 +79,7 @@ def combat(data: dict):
         "enemy": enemy,
         "log": log
     })
+
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
