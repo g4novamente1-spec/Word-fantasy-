@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>World Fantasy</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
 <canvas id="gameCanvas"></canvas>
 
-<script type="module" src="main.js"></script>
+<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
 
 </body>
 </html>
