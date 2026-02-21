@@ -1,55 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Word Fantasy - Cidade</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial;
-            background-color: #222;
-            color: white;
-        }
-
-        .mapa {
-            position: relative;
-            display: inline-block;
-        }
-
-        .mapa img {
-            width: 800px;
-            border: 3px solid #555;
-        }
-
-        .botao-loja {
-            position: absolute;
-            top: 300px;
-            left: 500px;
-            padding: 10px 15px;
-            background-color: red;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .botao-loja:hover {
-            background-color: darkred;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>World Fantasy</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🏰 Cidade de Word Fantasy</h1>
+<canvas id="gameCanvas"></canvas>
 
-<div class="mapa">
-    <img src="/static/cidade.png">
-    <button class="botao-loja" onclick="entrarLoja()">Loja de Poções</button>
-</div>
-
-<script>
-    function entrarLoja() {
-        window.location.href = "/loja";
-    }
-</script>
+<script type="module" src="main.js"></script>
 
 </body>
 </html>
