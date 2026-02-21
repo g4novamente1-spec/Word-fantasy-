@@ -1,319 +1,55 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Word Fantasy - Medieval Edition</title>
+    <title>Word Fantasy - Cidade</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            background-color: #222;
+            color: white;
+        }
 
-<style>
-body {
-    margin:0;
-    font-family: 'Trebuchet MS', sans-serif;
-    background: url('assets/imagens/fundo.jpg') no-repeat center center fixed;
-    background-size: cover;
-    color: #f5e6c8;
-}
+        .mapa {
+            position: relative;
+            display: inline-block;
+        }
 
-.overlay {
-    background: rgba(0,0,0,0.8);
-    min-height:100vh;
-    padding:20px;
-}
+        .mapa img {
+            width: 800px;
+            border: 3px solid #555;
+        }
 
-h1 {
-    text-align:center;
-    color: gold;
-}
+        .botao-loja {
+            position: absolute;
+            top: 300px;
+            left: 500px;
+            padding: 10px 15px;
+            background-color: red;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-.container {
-    display:flex;
-    justify-content:space-around;
-    flex-wrap:wrap;
-}
-
-.card {
-    background:#1b1b1b;
-    border:2px solid gold;
-    border-radius:12px;
-    padding:15px;
-    width:300px;
-    text-align:center;
-    margin:10px;
-}
-
-img {
-    width:150px;
-}
-
-.bar {
-    background:#333;
-    border-radius:10px;
-    overflow:hidden;
-    height:20px;
-    margin:5px 0;
-}
-
-.bar-fill {
-    height:100%;
-    background:green;
-    width:100%;
-    transition:0.3s;
-}
-
-.bar-xp {
-    background:blue;
-}
-
-button {
-    background:darkred;
-    color:white;
-    border:none;
-    padding:10px;
-    margin:5px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:bold;
-}
-
-button:hover {
-    background:red;
-}
-
-#log {
-    background:#111;
-    border:2px solid gold;
-    padding:10px;
-    height:150px;
-    overflow-y:auto;
-    margin-top:10px;
-}
-
-.critico {
-    color: red;
-    font-weight:bold;
-}
-</style>
+        .botao-loja:hover {
+            background-color: darkred;
+        }
+    </style>
 </head>
-
 <body>
-<div class="overlay">
 
-<h1>⚔️ Word Fantasy - Medieval Edition</h1>
+<h1>🏰 Cidade de Word Fantasy</h1>
 
-<div class="container">
-
-<div class="card">
-<h2>🧙 Jogador</h2>
-<img src="assets/imagens/jogador.png">
-<p>Nível: <span id="nivel"></span></p>
-
-<div class="bar"><div id="vidaBar" class="bar-fill"></div></div>
-<p>Vida: <span id="vidaTexto"></span></p>
-
-<div class="bar"><div id="xpBar" class="bar-fill bar-xp"></div></div>
-<p>XP: <span id="xpTexto"></span></p>
-
-<p>Ataque: <span id="ataque"></span></p>
-<p>Defesa: <span id="defesa"></span></p>
-<p>💰 Ouro: <span id="ouro"></span></p>
-<p>🧪 Poções: <span id="pocoes"></span></p>
-
-<button onclick="usarPocao()">Usar Poção</button>
-</div>
-
-<div class="card">
-<h2>👹 Inimigo</h2>
-<img id="imgInimigo">
-<p id="nomeInimigo"></p>
-
-<div class="bar"><div id="vidaInimigoBar" class="bar-fill"></div></div>
-<p>Vida: <span id="vidaInimigoTexto"></span></p>
-
-<button onclick="atacar()">⚔️ Atacar</button>
-</div>
-
-<div class="card">
-<h2>🏪 Loja</h2>
-<button onclick="comprarPocao()">Poção (20 ouro)</button>
-<button onclick="comprarForca()">+4 Ataque Permanente (30 ouro)</button>
-<button onclick="venderItens()">Vender Itens</button>
-
-<h3>🎒 Inventário</h3>
-<ul id="inventario"></ul>
-</div>
-
-</div>
-
-<h3>📜 Log</h3>
-<div id="log"></div>
-
+<div class="mapa">
+    <img src="/static/cidade.png">
+    <button class="botao-loja" onclick="entrarLoja()">Loja de Poções</button>
 </div>
 
 <script>
-
-let jogador;
-let inimigo;
-
-function iniciar(){
-    jogador = {
-        nivel:1,
-        xp:0,
-        xpMax:50,
-        vidaMax:100,
-        vida:100,
-        ataque:15,
-        defesa:5,
-        ouro:0,
-        inventario:[],
-        pocoes:0
-    };
-    gerarInimigo();
-    atualizarTela();
-}
-
-function gerarInimigo(){
-
-    let tipos=[
-        {nome:"Goblin", drop:"Orelha de Goblin", ouro:10, img:"assets/imagens/goblin.png"},
-        {nome:"Orc", drop:"Dente de Orc", ouro:15, img:"assets/imagens/orc.png"},
-        {nome:"Esqueleto", drop:"Osso Amaldiçoado", ouro:20, img:"assets/imagens/esqueleto.png"}
-    ];
-
-    let tipo=tipos[Math.floor(Math.random()*tipos.length)];
-    let escala=Math.floor(jogador.nivel/4)+1;
-
-    inimigo={
-        nome:tipo.nome,
-        vida:60*escala,
-        vidaMax:60*escala,
-        ataque:12*escala,
-        drop:tipo.drop,
-        valor:tipo.ouro,
-        img:tipo.img
-    };
-
-    document.getElementById("imgInimigo").src=inimigo.img;
-    atualizarTela();
-}
-
-function atacar(){
-
-    let critico=Math.random()<0.2;
-    let dano=jogador.ataque + Math.floor(Math.random()*5);
-
-    if(critico){
-        dano*=2;
-        log("<span class='critico'>💥 CRÍTICO! "+dano+" de dano!</span>");
-    }else{
-        log("⚔️ Você causou "+dano+" de dano.");
+    function entrarLoja() {
+        window.location.href = "/loja";
     }
-
-    inimigo.vida-=dano;
-
-    if(inimigo.vida<=0){
-        log("👹 "+inimigo.nome+" derrotado!");
-        jogador.xp+=20;
-        jogador.inventario.push({nome:inimigo.drop,valor:inimigo.valor});
-        verificarLevelUp();
-        gerarInimigo();
-        return;
-    }
-
-    let danoInimigo=inimigo.ataque - jogador.defesa;
-    if(danoInimigo<0)danoInimigo=0;
-
-    jogador.vida-=danoInimigo;
-    log("👹 Você recebeu "+danoInimigo+" de dano.");
-
-    if(jogador.vida<=0){
-        log("💀 Você morreu!");
-        setTimeout(iniciar,2000);
-    }
-
-    atualizarTela();
-}
-
-function verificarLevelUp(){
-    if(jogador.xp>=jogador.xpMax){
-        jogador.xp-=jogador.xpMax;
-        jogador.nivel++;
-        jogador.xpMax+=40;
-        jogador.vidaMax+=25;
-        jogador.ataque+=5;
-        jogador.defesa+=2;
-        jogador.vida=jogador.vidaMax;
-        log("✨ LEVEL UP! Nível "+jogador.nivel);
-    }
-}
-
-function comprarPocao(){
-    if(jogador.ouro>=20){
-        jogador.ouro-=20;
-        jogador.pocoes++;
-        log("🧪 Poção comprada!");
-    }
-    atualizarTela();
-}
-
-function usarPocao(){
-    if(jogador.pocoes>0){
-        jogador.pocoes--;
-        jogador.vida+=40;
-        if(jogador.vida>jogador.vidaMax)jogador.vida=jogador.vidaMax;
-        log("🧪 Vida restaurada!");
-    }
-    atualizarTela();
-}
-
-function comprarForca(){
-    if(jogador.ouro>=30){
-        jogador.ouro-=30;
-        jogador.ataque+=4;
-        log("💪 +4 Ataque permanente!");
-    }
-    atualizarTela();
-}
-
-function venderItens(){
-    let total=0;
-    jogador.inventario.forEach(item=>total+=item.valor);
-    jogador.ouro+=total;
-    jogador.inventario=[];
-    log("💰 Itens vendidos por "+total+" ouro.");
-    atualizarTela();
-}
-
-function atualizarTela(){
-
-    document.getElementById("nivel").innerText=jogador.nivel;
-    document.getElementById("ataque").innerText=jogador.ataque;
-    document.getElementById("defesa").innerText=jogador.defesa;
-    document.getElementById("ouro").innerText=jogador.ouro;
-    document.getElementById("pocoes").innerText=jogador.pocoes;
-    document.getElementById("nomeInimigo").innerText=inimigo.nome;
-
-    document.getElementById("vidaTexto").innerText=jogador.vida+"/"+jogador.vidaMax;
-    document.getElementById("xpTexto").innerText=jogador.xp+"/"+jogador.xpMax;
-    document.getElementById("vidaInimigoTexto").innerText=inimigo.vida+"/"+inimigo.vidaMax;
-
-    document.getElementById("vidaBar").style.width=(jogador.vida/jogador.vidaMax*100)+"%";
-    document.getElementById("xpBar").style.width=(jogador.xp/jogador.xpMax*100)+"%";
-    document.getElementById("vidaInimigoBar").style.width=(inimigo.vida/inimigo.vidaMax*100)+"%";
-
-    let lista=document.getElementById("inventario");
-    lista.innerHTML="";
-    jogador.inventario.forEach(item=>{
-        lista.innerHTML+="<li>"+item.nome+" ("+item.valor+" ouro)</li>";
-    });
-}
-
-function log(texto){
-    let l=document.getElementById("log");
-    l.innerHTML+="<p>"+texto+"</p>";
-    l.scrollTop=l.scrollHeight;
-}
-
-iniciar();
-
 </script>
+
 </body>
 </html>
